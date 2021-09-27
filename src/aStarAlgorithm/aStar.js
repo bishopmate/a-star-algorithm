@@ -1,8 +1,5 @@
 function aStar(startNode, endNode){
-    let openSet = [], closed = [], path = [];
-    let closedSet = [];
-    let path = [];
-    
+    let openSet = [], closedSet = [], path = [], visitedNodes = [];
     openSet.push(startNode);
     while(openSet.length > 0){
         let leastIndex = 0;
@@ -14,41 +11,50 @@ function aStar(startNode, endNode){
     
     
         let currentNode = openSet[leastIndex];
+        visitedNodes.push(currentNode);
         if(currentNode === endNode){
-            //Path found
-            console.log("Done! Path Found");
+            let temp = currentNode;
+            path.push(temp);
+            while(temp.parent){
+                temp = temp.parent;
+                path.push(temp);
+            }
+            console.log(path);
+            return {path,visitedNodes};
         }
 
-        openSet = openSet.filter(node => node != currentNode);
+        openSet = openSet.filter(node => node !== currentNode);
         closedSet.push(currentNode);
 
         let neighbors = currentNode.neighbors;
         for(let i=0; i<neighbors.length; i++){
-            let currentNodeNeighbor = neighbors[i];
-            if(!closedSet.includes(currentNodeNeighbor)){
+            let currentNeighborNode = neighbors[i];
+            if(!closedSet.includes(currentNeighborNode)){
                 let newG = currentNode.g+1;
                 let newNeighborAccepted = false;
-                if(openSet.includes(currentNodeNeighbor)){
-                    if(newG < currentNodeNeighbor.g){
-                        currentNodeNeighbor.g = newG;
+                if(currentNeighborNode.isObstacle)  continue;
+                if(openSet.includes(currentNeighborNode)){
+                    if(newG < currentNeighborNode.g){
+                        currentNeighborNode.g = newG;
                         newNeighborAccepted = true;
                     }
                 }else{  
-                    currentNodeNeighbor.g = newG;
+                    currentNeighborNode.g = newG;
                     newNeighborAccepted = true;
-                    openSet.push(currentNodeNeighbor);
-                }
+                    openSet.push(currentNeighborNode);
+                } 
 
-                if(newPath){
-                    currentNodeNeighbor.h = heuristic(currentNodeNeighbor, endNode);
-                    currentNodeNeighbor.f = currentNodeNeighbor.g + currentNodeNeighbor.h
-                    currentNodeNeighbor.parent = currentNode;
+                if(newNeighborAccepted){
+                    currentNeighborNode.h = heuristic(currentNeighborNode, endNode);
+                    currentNeighborNode.f = currentNeighborNode.g + currentNeighborNode.h
+                    currentNeighborNode.parent = currentNode;
                 }
 
             }
         }
     }
-
+    
+    return {path, visitedNodes, error : "No Path Found"};
 
 }
 
